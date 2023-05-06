@@ -1,85 +1,36 @@
 from typing import Union, Any
+import re
 
-
-class Ship:
-    def __init__(self, x, y, size, vector):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.vector = vector
-        self.healf = size
+DESK_SIZE = 6
 
 
 
-# Класс игрового поля
-class GameDesk:
-    def __init__(self, size):
-        self.size = size
-        self.desk = [['O'] * self.size for i in range(self.size)]
 
-    # метод для очистки игрового поля
-    def clear(self):
-        self.desk = [['O'] * self.size for i in range(self.size)]
-
-    # метод для расстановки кораблей
-    def set_ship(self, ship):
-        # не выходят ли координаты x и y за пределы игрового поля?
-        if ship.x < 1 or ship.x > self.size or ship.y < 1 or ship.y > self.size:
-            return False
-        # не выходит ли корабль за пределы игрового поля
-        if (ship.vector == 'R' and ship.y + ship.size - 1 > self.size
-                or ship.vector == 'D' and ship.x + ship.size - 1 > self.size):
-            return False
-
-        # не заняты ли клетки
-        # рассчитываем координаты "пятна" поиска
-        if ship.vector == 'D':
-            start_x = ship.x if ship.x == 1 else ship.x - 1
-            stop_x = self.size if ship.x + ship.size - 1 == self.size else ship.x + ship.size
-            start_y = ship.y if ship.y == 1 else ship.y - 1
-            stop_y = ship.y if ship.y == self.size else ship.y + 1
-        else:
-            # ship.vector == 'R'
-            start_x = ship.x if ship.x == 1 else ship.x - 1
-            stop_x = ship.x if ship.x == self.size else ship.x + 1
-            start_y = ship.y if ship.y == 1 else ship.y - 1
-            stop_y = self.size if ship.y + ship.size - 1 == self.size else ship.y + ship.size
-
-        for i in range(start_x - 1, stop_x):
-            for j in range(start_y - 1, stop_y):
-                if not self.desk[i][j] == 'O':
-                    return False
-
-        # заполняем клетки символами корабля
-
-        for n in range(ship.size):
-            if ship.vector == 'D':
-                self.desk[ship.x - 1 + n][ship.y - 1] = '■'
-
-            else:
-                self.desk[ship.x - 1][ship.y - 1 + n] = '■'
-
-        return True
-
-
-def show_desk(desk):
+# функция отрисовки игрового поля
+def show_desk(desk, repl):
     print()
-    print("    | 1 | 2 | 3 | 4 | 5 | 6 | ")
-    print("  --------------------------- ")
+    row_str = ""
+    for i in range(1, len(desk) + 1):
+        row_str = row_str + '' + str(i) + ' | '
+    print(f"    | {row_str}")
+    # print("    | 1 | 2 | 3 | 4 | 5 | 6 | ")
+    print("  ---" + "----" * len(desk))
     for i, row in enumerate(desk):
         row_str = f"  {i + 1} | {' | '.join(row)} | "
-        print(row_str)
+        print(re.sub('\| [0-9]+', '| ' + repl, row_str))
     print()
 
 
-s_1 = Ship(3, 2, 3, 'D')
-s_2 = Ship(3, 1, 2, 'R')
-s_3 = Ship(1, 5, 2, 'R')
-s_4 = Ship(6, 6, 1, 'D')
-s_5 = Ship(6, 1, 1, 'D')
-s_6 = Ship(4, 4, 1, 'D')
-s_7 = Ship(4, 6, 1, 'D')
-d_1 = GameDesk(6)
+s_1 = Ship(3, 2, 3, 'D', '1')
+s_2 = Ship(3, 1, 2, 'R', '2')
+s_3 = Ship(1, 5, 2, 'R', '3')
+s_4 = Ship(6, 6, 1, 'D', '4')
+s_5 = Ship(6, 1, 1, 'D', '5')
+s_6 = Ship(4, 4, 1, 'D', '6')
+s_7 = Ship(4, 6, 1, 'D', '7')
+ships = {1: s_1, 2: s_2, 3: s_3, 4: s_4}
+d_1 = GameDesk(DESK_SIZE)
+d_2 = GameDesk(DESK_SIZE)
 d_1.set_ship(s_1)
 d_1.set_ship(s_2)
 d_1.set_ship(s_3)
@@ -88,4 +39,8 @@ d_1.set_ship(s_5)
 d_1.set_ship(s_6)
 d_1.set_ship(s_7)
 
-show_desk(d_1.desk)
+print()
+print("    " * int(DESK_SIZE // 2) + "Игрок")
+show_desk(d_1.desk, '■')
+print("    " * int(DESK_SIZE // 2) + "ИИ")
+show_desk(d_2.desk, 'O')
