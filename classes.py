@@ -32,15 +32,15 @@ class GameDesk:
 
     # метод получения значения ячейки
     def get_cell(self, x, y):
-        return self.desk[x][y]
+        return self.desk[x-1][y-1]
 
     # метод установки значения ячейки
     def set_cell(self, x, y, char_):
-        self.desk[x][y] = char_
+        self.desk[x-1][y-1] = char_
 
     # метод проверки занятости ячейки
     def cell_is_free(self, x, y):
-        return True if self.desk[x][y] == 'O' else False
+        return True if self.desk[x-1][y-1] == 'O' else False
 
     # метод для расстановки кораблей
     def set_ship(self, ship):
