@@ -1,16 +1,17 @@
 class Ship:
-    def __init__(self, x, y, size, vector, id_):
+    def __init__(self, x, y, size, vector, id_=''):
         self.x = x
         self.y = y
         self.size = size
         self.vector = vector
-        self.healf = size
+        self.health = size
         self.id_ = id_
+
 
     # метод повреждения корабля, возвращает 0 если "потопил"
     def strike(self):
-        self.healf -= 1
-        return self.healf
+        self.health -= 1
+        return self.health
 
 
 # Класс игрового поля
@@ -24,8 +25,10 @@ class GameDesk:
         self.desk = [['O'] * self.size for i in range(self.size)]
 
     # метод проверки выхода координат за пределы игрового поля
-    def is_out_of_range(self, x, y):
-        return True
+    def out_of_range(self, x, y):
+        if x < 1 or x > self.size or y < 1 or y > self.size:
+            return True
+        return False
 
     # метод получения значения ячейки
     def get_cell(self, x, y):
@@ -42,7 +45,7 @@ class GameDesk:
     # метод для расстановки кораблей
     def set_ship(self, ship):
         # не выходят ли координаты x и y за пределы игрового поля?
-        if ship.x < 1 or ship.x > self.size or ship.y < 1 or ship.y > self.size:
+        if self.out_of_range(ship.x, ship.y):
             return False
         # не выходит ли корабль за пределы игрового поля?
         if (ship.vector == 'R' and ship.y + ship.size - 1 > self.size
@@ -71,7 +74,6 @@ class GameDesk:
 
         # все хорошо
         # заполняем клетки символами id корабля
-
         for n in range(ship.size):
             if ship.vector == 'D':
                 self.desk[ship.x - 1 + n][ship.y - 1] = ship.id_
@@ -81,8 +83,8 @@ class GameDesk:
 
     # метод выстрела
     def fire(self, x, y):
-        # хотябы в поле попали, уже хорошо)
-        if self.is_out_of_range(x, y):
+        # хотя бы в поле попали, уже хорошо :)
+        if self.out_of_range(x, y):
             return False
         # в клетке уже что-то есть?
         cell = self.get_cell(x, y)

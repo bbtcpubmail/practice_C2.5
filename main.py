@@ -1,6 +1,7 @@
 # sea batеle game for SkillFactory С2.5
 import os
 import re
+from random import randint
 from classes import Ship, GameDesk
 
 DESK_SIZE = 6
@@ -22,16 +23,20 @@ gameRulesText = """
     кораблей 7. Один размером в 3 клетки, два - 2 клетки, четыре - 1 клетка. Чтобы установить
     корабль на место, необходимо задать коордниаты его начальной точки X, Y(строка - столбец),
     его размер и направление (вниз - 'D', вправо - 'R'). Для выстрела игрок указывает коорди-
-    наты клетки. В случае попадания клетка помечается знаком - 'Х', в случае промоха 'T'. Для
-    победы необходимо первым уничтожить все корабли соперника.
+    наты клетки. В случае попадания клетка помечается знаком - 'Х', в случае промоха - 'T'.
+    Для победы необходимо первым уничтожить все корабли соперника.
     
     """
-ships = [(3, 1), (2, 2), (1, 4)]
 
+# количество и типы кораблей
+ships = [(3, 1), (2, 2), (1, 4)]
+user_ships = {}
+ai_ships = {}
 
 # функция отрисовки игрового поля
-def show_desk(desk, repl):
+def show_desk(desk, hide):
     print()
+    ship_symbol = 'O' if hide else '■'
     row_str = ""
     for i in range(1, len(desk) + 1):
         row_str = row_str + '' + str(i) + ' | '
@@ -39,44 +44,92 @@ def show_desk(desk, repl):
     # print("    | 1 | 2 | 3 | 4 | 5 | 6 | ")
     print("  ---" + "----" * len(desk))
     for i, row in enumerate(desk):
+        # прячем id_ кораблей от пользователя
+
         row_str = f"  {i + 1} | {' | '.join(row)} | "
-        #print(row_str)
-        print(re.sub('\| [0-9]+', '| ' + repl, row_str))
+        row_str = re.sub('\| [0-9]+', '| ' + ship_symbol, row_str)
+        # print(row_str)
+        print(row_str)
     print()
 
+# функция получения случайных координат
+def get_rnd_coord(desk_size):
+    x = randint(1, desk_size)
+    y = randint(1, desk_size)
+    v = 'D' if randint(0, 1) else 'R'
+    print(x,y,v)
+    return x, y, v
 
+# выводим приветствие и правила игры
 print(helloText)
 print(gameRulesText)
-input("                 Нажмите Enter чтобы продолжить ")
-
-for size, count in ships:
-    for i in range(count):
-        os.system('cls||clear')
-        x,y,v = input(f"    Введите координаты X, Y и направление ('D', 'R') корабля длиной {size}").split()
-
-
-
-s_1 = Ship(3, 2, 3, 'D', '1')
-s_2 = Ship(3, 1, 2, 'R', '2')
-s_3 = Ship(1, 5, 2, 'R', '3')
-s_4 = Ship(6, 6, 1, 'D', '4')
-s_5 = Ship(6, 1, 1, 'D', '5')
-s_6 = Ship(4, 4, 1, 'D', '6')
-s_7 = Ship(4, 6, 1, 'D', '7')
-ships = {1: s_1, 2: s_2, 3: s_3, 4: s_4}
-d_1 = GameDesk(DESK_SIZE)
-d_2 = GameDesk(DESK_SIZE)
-d_1.set_ship(s_1)
-d_1.set_ship(s_2)
-d_1.set_ship(s_3)
-d_1.set_ship(s_4)
-d_1.set_ship(s_5)
-d_1.set_ship(s_6)
-d_1.set_ship(s_7)
-
+input("                 Нажмите 'Enter' чтобы продолжить ")
 print()
-print("    " * int(DESK_SIZE // 2) + "Игрок")
-show_desk(d_1.desk, '■')
-#print(d_1.desk)
-print("    " * int(DESK_SIZE // 2) + "ИИ")
-show_desk(d_2.desk, 'O')
+
+# создаем объекты игровых полей игрока и ИИ
+player_desk = GameDesk(DESK_SIZE)
+ai_desk = GameDesk(DESK_SIZE)
+
+# получаем от игрока в цикле координаты кораблей и отображаем их на игровом поле
+for size, count in ships:
+    for i in range(1, count + 1):
+        os.system('cls||clear')
+        print("    " * int(DESK_SIZE // 2) + "Игрок")
+        show_desk(player_desk.desk, False)
+        show_desk(ai_desk.desk, False)
+        input_str = input(
+            f"    Введите координаты (X, Y) и направление "
+            f" вниз - 'D', вправо - 'R' (по умолчанию 'R') корабля длиной {size} клетки ").replace(" ", "")
+
+        x = input_str[0]
+        y = input_str[1]
+        v = input_str[2].upper() if len(input_str) == 3 else 'R'
+
+        # создаем объекты кораблей
+        ship = Ship(int(x), int(y), size, v, str(i))
+        # расставляем корабли на игровом поле
+        player_desk.set_ship(ship)
+        # и помещаем их в словарь, чтобы обращаться к ним по ключу
+        user_ships[str(i)] = ship
+        # заодно сразу рандомно расставим корабли ИИ
+        while 1:
+            x, y, v = get_rnd_coord(DESK_SIZE)
+            ship = Ship(x, y, size, v, str(i))
+            if ai_desk.set_ship(ship):
+                ai_ships[str(i)] = ship
+                break
+            del ship
+
+
+# начинаем игру
+while 1:
+    os.system('cls||clear')
+    print()
+    print("    " * int(DESK_SIZE // 2) + "Игрок")
+    show_desk(player_desk.desk, False)
+    # print(player_desk.desk)
+    print("    " * int(DESK_SIZE // 2) + "ИИ")
+    show_desk(ai_desk.desk, False)
+    print()
+    print("   Стреляет игрок")
+    input_str = input("    Введите координаты (X, Y) выстрела  ").replace(" ", "")
+    cell = ai_desk.fire(int(input_str[0]), int(input_str[1]))
+    if cell == 'T':
+        print("      Мимо!")
+    elif not cell:
+        print("      Повторный выстрел")
+    else:
+        # попали в корабль, надо проверить жив ли он еще
+        if ai_ships[cell].strike():
+            print("     Ранил!")
+        else:
+            print("     Потопил!")
+            ai_ships.pop(cell)
+            if not len(ai_ships):
+                print("Победил игрок")
+                break
+
+
+
+
+
