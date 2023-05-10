@@ -91,8 +91,9 @@ for size, count in ships:
         player_desk.set_ship(ship)
         # и помещаем их в словарь, чтобы обращаться к ним по ключу
         user_ships[str(i)] = ship
-        # заодно сразу рандомно расставим корабли ИИ
-        while 1:
+        # заодно сразу рандомно расставим корабли ИИ.
+        # дадим ему на это не более 30 циклов т.к. возможна тупиковая ситуация (поле 6х6 слишком мало)
+        for j in range(30):
             x, y, v = get_rnd_coord(DESK_SIZE)
             ship = Ship(x, y, size, v, str(i))
             if ai_desk.set_ship(ship):
