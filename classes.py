@@ -1,11 +1,11 @@
 class Ship:
-    def __init__(self, x, y, size, vector, id_=''):
+    def __init__(self, x, y, size, vector):
         self.x = x
         self.y = y
         self.size = size
         self.vector = vector
         self.health = size
-        self.id_ = id_
+
 
 
     # метод повреждения корабля, возвращает 0 если "потопил"
@@ -74,11 +74,12 @@ class GameDesk:
 
         # все хорошо
         # заполняем клетки символами id корабля
+        id_ = str(id(ship))
         for n in range(ship.size):
             if ship.vector == 'D':
-                self.desk[ship.x - 1 + n][ship.y - 1] = ship.id_
+                self.desk[ship.x - 1 + n][ship.y - 1] = id_
             else:
-                self.desk[ship.x - 1][ship.y - 1 + n] = ship.id_
+                self.desk[ship.x - 1][ship.y - 1 + n] = id_
         return True
 
     # метод выстрела
