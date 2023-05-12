@@ -117,16 +117,20 @@ for size, count in ships:
                 y = int(input_str[1])
                 v = input_str[2].upper() if len(input_str) == 3 else 'R'
             except Exception:
-                print("Некорректный ввод! X и Y должны быть целыми числами, а направление - символом 'D' - вниз или"
+                print("\n    Некорректный ввод! X и Y должны быть целыми числами, а направление - символом 'D' - вниз или"
                         " 'R' - вправо. Все координаты должны разделяться пробелами. Попробуйте еще раз.")
-                print()
+                continue
             else:
-                break
-
-        # создаем объекты кораблей
-        ship = Ship(x, y, size, v)
-        # расставляем корабли на игровом поле
-        player_desk.set_ship(ship)
+                # создаем объекты кораблей
+                ship = Ship(x, y, size, v)
+                # расставляем корабли на игровом поле
+                try:
+                    player_desk.set_ship(ship)
+                except Exception as ex:
+                    print('\n    Некорректный ввод. ' + str(ex) + " Попробуйте еще раз.")
+                    del ship
+                    continue
+            break
         # и помещаем их в словарь, чтобы обращаться к ним по ключу
         player_ships[str(id(ship))] = ship
         # заодно сразу рандомно расставим корабли ИИ.
@@ -134,10 +138,14 @@ for size, count in ships:
         for j in range(30):
             x, y, v = get_rnd_coord(DESK_SIZE)
             ship = Ship(x, y, size, v)
-            if ai_desk.set_ship(ship):
+            try:
+                ai_desk.set_ship(ship)
+            except Exception:
+                del ship
+                continue
+            else:
                 ai_ships[str(id(ship))] = ship
                 break
-            del ship
         os.system('cls||clear')
         print_desk(player_desk.desk, ai_desk.desk)
 
@@ -149,19 +157,30 @@ while 1:
     try:
         x, y = map(int, input("    (X, Y) >>>  ").split())
     except Exception:
-        print("Некорректный ввод! X и Y должны быть целыми числами и должны разделяться пробелом. Попробуйте еще раз.")
+        print("\n    Некорректный ввод! X и Y должны быть целыми числами и должны разделяться пробелом. Попробуйте еще раз.")
         continue
 
-    cell = ai_desk.fire(x, y)
+    try:
+        cell = ai_desk.fire(x, y)
+    except Exception as ex:
+        print("\n    Некорректный ввод. " + str(ex) + " Попробуйте еще раз.")
+        continue
+
     os.system('cls||clear')
     print_desk(player_desk.desk, ai_desk.desk)
-    print(f'    Координаты вашего выстрела = {x}, {y}. ', end='')
+    print(f'    Координаты вашего выстрела = {x} {y}. ', end='')
     if not check_result(cell, ai_ships):
         break
     print("\n    Стреляет ИИ. ", end='')
     input("Нажмите 'Enter' чтобы продолжить...")
-    x, y, v = get_rnd_coord(DESK_SIZE)
-    cell = player_desk.fire(x, y)
+    while 1:
+        x, y, v = get_rnd_coord(DESK_SIZE)
+        try:
+            cell = player_desk.fire(x, y)
+        except Exception:
+            continue
+        else:
+            break
     os.system('cls||clear')
     print_desk(player_desk.desk, ai_desk.desk)
     print(f'    Координаты выстрела ИИ = {x}, {y}. ', end='')

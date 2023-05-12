@@ -46,11 +46,11 @@ class GameDesk:
     def set_ship(self, ship):
         # не выходят ли координаты x и y за пределы игрового поля?
         if self.out_of_range(ship.x, ship.y):
-            return False
+            raise Exception("Out of range.")
         # не выходит ли корабль за пределы игрового поля?
         if (ship.vector == 'R' and ship.y + ship.size - 1 > self.size
                 or ship.vector == 'D' and ship.x + ship.size - 1 > self.size):
-            return False
+            raise Exception("Out of range.")
 
         # не заняты ли клетки?
         # рассчитываем координаты "пятна" поиска
@@ -70,7 +70,7 @@ class GameDesk:
         for i in range(start_x - 1, stop_x):
             for j in range(start_y - 1, stop_y):
                 if not self.desk[i][j] == 'O':
-                    return False
+                    raise Exception("The Cell isn't free.")
 
         # все хорошо
         # заполняем клетки символами id корабля
@@ -86,11 +86,11 @@ class GameDesk:
     def fire(self, x, y):
         # хотя бы в поле попали, уже хорошо :)
         if self.out_of_range(x, y):
-            return False
+            raise Exception("Out of range.")
         # в клетке уже что-то есть?
         cell = self.get_cell(x, y)
         if cell == 'T' or cell == 'X':
-            return False
+            raise Exception("The Cell on Fire already.")
         elif cell == 'O':
             self.set_cell(x, y, 'T')
             return 'T'
