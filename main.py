@@ -57,7 +57,7 @@ def get_rnd_coord(desk_size):
     x = randint(1, desk_size)
     y = randint(1, desk_size)
     v = 'D' if randint(0, 1) else 'R'
-    print(x,y,v)
+    #print(x,y,v)
     return x, y, v
 
 def check_result(cell, ship_list):
@@ -73,19 +73,21 @@ def check_result(cell, ship_list):
             print("     Потопил!")
             ship_list.pop(cell)
             if not len(ship_list):
-                winner = 'Игрок' if ship_list is ai_ships else 'ИИ'
+                winner = 'Человек' if ship_list is ai_ships else 'ИИ'
                 os.system('cls||clear')
-                return """\n\n\n\n       
+                print(f"""\n\n\n\n       
                 *****************************
                 *                           *
-                *       Победил игрок!      *
+                       Победил {winner}      
                 *                           *
                 *****************************
-                """
-            return "    Потопил!"
+                """)
+                return False
+    return True
 
 
 # выводим приветствие и правила игры
+os.system('cls||clear')
 print(helloText)
 print(gameRulesText)
 input("                 Нажмите 'Enter' чтобы продолжить ")
@@ -140,11 +142,21 @@ while 1:
     print("\n   Стреляет игрок")
     input_str = input("    Введите координаты (X, Y) выстрела  ").replace(" ", "")
     cell = ai_desk.fire(int(input_str[0]), int(input_str[1]))
+    os.system('cls||clear')
+    print()
+    print("    " * int(DESK_SIZE // 2) + "Игрок")
+    show_desk(player_desk.desk, False)
+    # print(player_desk.desk)
+    print("    " * int(DESK_SIZE // 2) + "ИИ")
+    show_desk(ai_desk.desk, False)
     if not check_result(cell, ai_ships):
         break
     print("\n   Стреляет ИИ")
     input("                 Нажмите 'Enter' чтобы продолжить ")
-    
+    x, y, v = get_rnd_coord(DESK_SIZE)
+    cell = player_desk.fire(x, y)
+    if not check_result(cell, player_ships):
+        break
 
 
 
