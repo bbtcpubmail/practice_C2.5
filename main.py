@@ -33,25 +33,6 @@ ships = [(3, 1), (2, 2), (1, 4)]
 player_ships = {}
 ai_ships = {}
 
-# функция отрисовки игрового поля
-def show_desk(desk, hide):
-    print()
-    ship_symbol = 'O' if hide else '■'
-    row_str = ""
-    for i in range(1, len(desk) + 1):
-        row_str = row_str + '' + str(i) + ' | '
-    print(f"    | {row_str}")
-    # print("    | 1 | 2 | 3 | 4 | 5 | 6 | ")
-    print("  ---" + "----" * len(desk))
-    for i, row in enumerate(desk):
-        # прячем id_ кораблей от пользователя
-
-        row_str = f"  {i + 1} | {' | '.join(row)} | "
-        row_str = re.sub('\| [0-9]+', '| ' + ship_symbol, row_str)
-        # print(row_str)
-        print(row_str)
-    print()
-
 # функция получения случайных координат
 def get_rnd_coord(desk_size):
     x = randint(1, desk_size)
@@ -65,6 +46,7 @@ def check_result(cell, ship_list):
             print("      Мимо!")
     elif not cell:
             print("      Повторный выстрел")
+
     else:
     # похоже попали в корабль, надо проверить жив ли он еще
         if ship_list[cell].strike():
@@ -85,35 +67,64 @@ def check_result(cell, ship_list):
                 return False
     return True
 
+# функция отрисовки игрового поля
+def print_desk(pdesk, adesk):
+    row_str = ""
+    print('\n\n\n')
+    print('         ' + '    ' * (DESK_SIZE // 2) + 'Человек' + '    ' + '    ' * DESK_SIZE + 'ИИ\n')
+    for i in range(1, DESK_SIZE + 1):
+        row_str = row_str + ('' + str(i) + ' | ')
+    print(f"           | {row_str}          | {row_str}")
+    # print("    | 1 | 2 | 3 | 4 | 5 | 6 | ")
+    print('         ---' + '----' * DESK_SIZE + '         ' + '---' + '----' * DESK_SIZE)
+    for i, row in enumerate(pdesk):
+        row_str = f"         {i + 1} | {' | '.join(row)} |"
+        # прячем id_ кораблей от пользователя
+        row_str = re.sub('\| [0-9]+', '| ' + '■', row_str)
+        print(row_str, end='')
+        row_str = f"         {i + 1} | {' | '.join(adesk[i])} | "
+        # то же самое для кораблей ИИ
+        row_str = re.sub('\| [0-9]+', '| ' + 'O', row_str)
+        print(row_str)
+        print()
+    print('\n\n')
 
 # выводим приветствие и правила игры
 os.system('cls||clear')
 print(helloText)
 print(gameRulesText)
-input("                 Нажмите 'Enter' чтобы продолжить ")
+input("                 Нажмите 'Enter' чтобы продолжить...")
 print()
 
 # создаем объекты игровых полей игрока и ИИ
 player_desk = GameDesk(DESK_SIZE)
 ai_desk = GameDesk(DESK_SIZE)
+os.system('cls||clear')
+print_desk(player_desk.desk, ai_desk.desk)
 
 # получаем от игрока в цикле координаты кораблей и отображаем их на игровом поле
 for size, count in ships:
     for i in range(1, count + 1):
-        os.system('cls||clear')
-        print("    " * int(DESK_SIZE // 2) + "Игрок")
-        show_desk(player_desk.desk, False)
-        show_desk(ai_desk.desk, False)
-        input_str = input(
-            f"    Введите координаты (X, Y) и направление "
-            f" вниз - 'D', вправо - 'R' (по умолчанию 'R') корабля длиной {size} клетки ").replace(" ", "")
-
-        x = input_str[0]
-        y = input_str[1]
-        v = input_str[2].upper() if len(input_str) == 3 else 'R'
+        print(f"    Введите координаты (X, Y) и направление вниз - 'D', вправо - 'R' "
+        f"(по умолчанию 'R') корабля длиной {size} ячейки(-а).\n")
+        while 1:
+            input_str = input("    (X, Y, D or R) >>>  ").split()
+            # x = input_str[0]
+            # y = input_str[1]
+            # v = input_str[2].upper() if len(input_str) == 3 else 'R'
+            try:
+                x = int(input_str[0])
+                y = int(input_str[1])
+                v = input_str[2].upper() if len(input_str) == 3 else 'R'
+            except Exception:
+                print("Некорректный ввод! X и Y должны быть целыми числами, а направление - символом 'D' - вниз или"
+                        " 'R' - вправо. Все координаты должны разделяться пробелами. Попробуйте еще раз.")
+                print()
+            else:
+                break
 
         # создаем объекты кораблей
-        ship = Ship(int(x), int(y), size, v)
+        ship = Ship(x, y, size, v)
         # расставляем корабли на игровом поле
         player_desk.set_ship(ship)
         # и помещаем их в словарь, чтобы обращаться к ним по ключу
@@ -127,34 +138,33 @@ for size, count in ships:
                 ai_ships[str(id(ship))] = ship
                 break
             del ship
+        os.system('cls||clear')
+        print_desk(player_desk.desk, ai_desk.desk)
 
 
 # начинаем игру
 while 1:
-    os.system('cls||clear')
-    print()
-    print("    " * int(DESK_SIZE // 2) + "Игрок")
-    show_desk(player_desk.desk, False)
-    # print(player_desk.desk)
-    print("    " * int(DESK_SIZE // 2) + "ИИ")
-    show_desk(ai_desk.desk, False)
+    print("\n    Стреляет игрок. ", end='')
+    print("Введите координаты выстрела.\n")
+    try:
+        x, y = map(int, input("    (X, Y) >>>  ").split())
+    except Exception:
+        print("Некорректный ввод! X и Y должны быть целыми числами и должны разделяться пробелом. Попробуйте еще раз.")
+        continue
 
-    print("\n   Стреляет игрок")
-    input_str = input("    Введите координаты (X, Y) выстрела  ").replace(" ", "")
-    cell = ai_desk.fire(int(input_str[0]), int(input_str[1]))
+    cell = ai_desk.fire(x, y)
     os.system('cls||clear')
-    print()
-    print("    " * int(DESK_SIZE // 2) + "Игрок")
-    show_desk(player_desk.desk, False)
-    # print(player_desk.desk)
-    print("    " * int(DESK_SIZE // 2) + "ИИ")
-    show_desk(ai_desk.desk, False)
+    print_desk(player_desk.desk, ai_desk.desk)
+    print(f'    Координаты вашего выстрела = {x}, {y}. ', end='')
     if not check_result(cell, ai_ships):
         break
-    print("\n   Стреляет ИИ")
-    input("                 Нажмите 'Enter' чтобы продолжить ")
+    print("\n    Стреляет ИИ. ", end='')
+    input("Нажмите 'Enter' чтобы продолжить...")
     x, y, v = get_rnd_coord(DESK_SIZE)
     cell = player_desk.fire(x, y)
+    os.system('cls||clear')
+    print_desk(player_desk.desk, ai_desk.desk)
+    print(f'    Координаты выстрела ИИ = {x}, {y}. ', end='')
     if not check_result(cell, player_ships):
         break
 
