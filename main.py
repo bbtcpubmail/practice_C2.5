@@ -2,7 +2,9 @@
 import os
 import re
 from random import randint
-from classes import Ship, GameDesk
+from frontend import Ship, GameDesk
+import exceptions
+import backend
 
 DESK_SIZE = 6
 

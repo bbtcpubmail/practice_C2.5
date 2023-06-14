@@ -1,17 +1,4 @@
-class Ship:
-    def __init__(self, x, y, size, vector):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.vector = vector
-        self.health = size
 
-
-
-    # метод повреждения корабля, возвращает 0 если "потопил"
-    def strike(self):
-        self.health -= 1
-        return self.health
 
 
 # Класс игрового поля
